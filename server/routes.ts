@@ -24,6 +24,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       if (error instanceof z.ZodError) {
         res.status(400).json({ message: "Dati non validi", errors: error.errors });
+      } else if (error instanceof Error && error.message.includes("è già registrato")) {
+        res.status(409).json({ message: error.message });
       } else {
         res.status(500).json({ message: "Errore durante la registrazione" });
       }
@@ -36,6 +38,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Registrazioni cancellate con successo" });
     } catch (error) {
       res.status(500).json({ message: "Errore durante la cancellazione" });
+    }
+  });
+
+  app.delete("/api/player-registrations/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deletePlayerRegistration(id);
+      res.json({ message: "Player eliminato con successo" });
+    } catch (error) {
+      res.status(500).json({ message: "Errore durante l'eliminazione del player" });
     }
   });
 

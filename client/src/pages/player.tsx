@@ -52,25 +52,6 @@ export default function PlayerPage() {
   });
 
   const onSubmit = (data: InsertPlayerRegistration) => {
-    // Controllo aggiuntivo per campi vuoti
-    if (!data.playerName.trim()) {
-      toast({
-        title: "Errore",
-        description: "Il nome player è obbligatorio",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (!data.thLevel) {
-      toast({
-        title: "Errore", 
-        description: "Il livello Town Hall è obbligatorio",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     registerPlayerMutation.mutate(data);
   };
 

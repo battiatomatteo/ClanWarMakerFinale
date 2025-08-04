@@ -1,6 +1,7 @@
 import { type PlayerRegistration, type InsertPlayerRegistration, type Clan, type InsertClan, type CwlMessage, type InsertCwlMessage, type ClanConfiguration } from "@shared/schema";
 import { playerRegistrations, clans, cwlMessages } from "@shared/schema";
 import { drizzle } from "drizzle-orm/better-sqlite3";
+import { sql } from "drizzle-orm";
 import Database from "better-sqlite3";
 import { promises as fs } from "fs";
 import path from "path";
@@ -90,7 +91,7 @@ export class SQLiteStorage implements IStorage {
   async addPlayerRegistration(insertRegistration: InsertPlayerRegistration): Promise<PlayerRegistration> {
     const registration: PlayerRegistration = {
       id: crypto.randomUUID(),
-      playerName: insertRegistration.playerName,
+      playerName: insertRegistration.playerName.trim(),
       thLevel: insertRegistration.thLevel,
       registeredAt: new Date(),
     };
@@ -112,6 +113,14 @@ export class SQLiteStorage implements IStorage {
     await this.clearFile('listaIscrizioni.txt');
 
     console.log('Tutte le registrazioni sono state cancellate dal database');
+  }
+
+  async deletePlayerRegistration(playerId: string): Promise<void> {
+    await this.db
+      .delete(playerRegistrations)
+      .where(sql`id = ${playerId}`);
+
+    console.log(`Player con ID ${playerId} eliminato dal database`);
   }
 
   async getClans(): Promise<Clan[]> {

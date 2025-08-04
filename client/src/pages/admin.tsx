@@ -129,6 +129,28 @@ export default function AdminPage() {
     },
   });
 
+  // Delete single player mutation
+  const deletePlayerMutation = useMutation({
+    mutationFn: async (playerId: string) => {
+      const response = await apiRequest("DELETE", `/api/player-registrations/${playerId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Successo",
+        description: "Player eliminato con successo",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/player-registrations"] });
+    },
+    onError: () => {
+      toast({
+        title: "Errore",
+        description: "Errore durante l'eliminazione del player",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Generate message mutation
   const generateMessageMutation = useMutation({
     mutationFn: async (clansData: ClanForm[]) => {
@@ -345,6 +367,12 @@ export default function AdminPage() {
   const handleClearRegistrations = () => {
     if (window.confirm("Sei sicuro di voler cancellare tutte le registrazioni?")) {
       clearRegistrationsMutation.mutate();
+    }
+  };
+
+  const handleDeletePlayer = (playerId: string, playerName: string) => {
+    if (window.confirm(`Sei sicuro di voler eliminare il player "${playerName}"?`)) {
+      deletePlayerMutation.mutate(playerId);
     }
   };
 
@@ -923,6 +951,7 @@ export default function AdminPage() {
                     <TableHead>Nome Player</TableHead>
                     <TableHead>Livello TH</TableHead>
                     <TableHead>Data Registrazione</TableHead>
+                    <TableHead>Azioni</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -938,11 +967,22 @@ export default function AdminPage() {
                       <TableCell className="text-sm text-gray-600">
                         {new Date(player.createdAt || Date.now()).toLocaleString('it-IT')}
                       </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDeletePlayer(player.id, player.playerName)}
+                          disabled={deletePlayerMutation.isPending}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                   {registrations.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center text-gray-500 py-8">
+                      <TableCell colSpan={5} className="text-center text-gray-500 py-8">
                         <div className="flex flex-col items-center space-y-2">
                           <Users className="h-12 w-12 text-gray-300" />
                           <p>Nessun player registrato ancora</p>
