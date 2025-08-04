@@ -24,6 +24,7 @@ export default function PlayerPage() {
       playerName: "",
       thLevel: "",
     },
+    mode: "onChange", // Validazione in tempo reale
   });
 
   const registerPlayerMutation = useMutation({
@@ -51,6 +52,25 @@ export default function PlayerPage() {
   });
 
   const onSubmit = (data: InsertPlayerRegistration) => {
+    // Controllo aggiuntivo per campi vuoti
+    if (!data.playerName.trim()) {
+      toast({
+        title: "Errore",
+        description: "Il nome player è obbligatorio",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!data.thLevel) {
+      toast({
+        title: "Errore", 
+        description: "Il livello Town Hall è obbligatorio",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     registerPlayerMutation.mutate(data);
   };
 
@@ -124,7 +144,11 @@ export default function PlayerPage() {
               <Button 
                 type="submit" 
                 className="w-full"
-                disabled={registerPlayerMutation.isPending}
+                disabled={
+                  registerPlayerMutation.isPending || 
+                  !form.watch("playerName")?.trim() || 
+                  !form.watch("thLevel")
+                }
               >
                 <Save className="mr-2 h-4 w-4" />
                 {registerPlayerMutation.isPending ? "Registrazione..." : "Registra Player"}

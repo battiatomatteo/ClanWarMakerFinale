@@ -1,4 +1,3 @@
-
 import { sql } from "drizzle-orm";
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
@@ -25,9 +24,11 @@ export const cwlMessages = sqliteTable("cwl_messages", {
   createdAt: integer("created_at", { mode: 'timestamp' }).$defaultFn(() => new Date()),
 });
 
-export const insertPlayerRegistrationSchema = createInsertSchema(playerRegistrations).pick({
-  playerName: true,
-  thLevel: true,
+export const insertPlayerRegistrationSchema = z.object({
+  playerName: z.string()
+    .min(1, "Nome player richiesto")
+    .refine(val => val.trim().length > 0, "Il nome player non può essere vuoto"),
+  thLevel: z.string().min(1, "Livello TH richiesto"),
 });
 
 export const insertClanSchema = createInsertSchema(clans).pick({
